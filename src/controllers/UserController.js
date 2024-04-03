@@ -52,9 +52,38 @@ class UserController{
             createStaff(req.body)
         res.status(200).json('success')
     }
-    // [PUT] /user/update/:id
-    async updateUser(req, res) {
-        
+    // [PUT] /user/update/:id - only update customer
+    async updateProfile(req, res) {
+        const { name, year, cccd, phone} = req.body
+        const { id_user} = req.params
+        await Customer.update(
+            {
+                custom_name: name,
+                year_of_birth: year,
+                id_card: cccd,
+                phone_number: phone,
+            },
+            {where: {UserId: id_user}}
+        )
+        res.status(200).json('success')
+    }
+    // [PUT] /user/changepassword/:id
+    async changePassword(req, res) {
+        const { oldPassword, newPassword } = req.body;
+        const user = await User.findOne({ where: { user_name: req.user.username } });
+
+        bcrypt.compare(oldPassword, user.password).then(async (match) => {
+            if (!match) res.json({ error: "Wrong Password Entered!" });
+
+            bcrypt.hash(newPassword, 10).then((hash) => {
+            User.update(
+                { password: hash },
+                { where: { user_name: req.user.user_name } }
+            );
+            res.status(200).json("SUCCESS");
+            });
+
+    });
     }
     // [POST] /login
     async login(req, res){
@@ -68,8 +97,6 @@ class UserController{
         .then(async (match) => {
             if (!match) 
                 res.json({ error: "Wrong Username And Password Combination" });
-            // Cài đặt phân quyền tại đây
-            // ...
             const accessToken = sign(
                 { username: user.user_name, id: user.id },
                 "importantsecret"
