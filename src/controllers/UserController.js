@@ -3,13 +3,12 @@ const bcrypt = require("bcrypt");
 const { sign } = require("jsonwebtoken");
 class UserController{
     
-    // [POST] /user/register
+    // [POST] /api/users/register
     async register(req, res, next) {
         const {username, password, typeRegister} = req.body
         if(!username || !password){
             return res.status(302).json({message: "Not have username or password"})
         }
-        
         //Kiểm tra người dùng có tồn tại?
         const userfind = await User.findOne({ where: { user_name: username } });
         if(userfind){
@@ -26,6 +25,7 @@ class UserController{
                 custom_name: user.name,
                 year_of_birth: user.year,
                 id_card: user.cccd,
+                address: user.address,
                 phone_number: user.phone,
                 state_account: 'active',
                 UserId: newUsername.id
