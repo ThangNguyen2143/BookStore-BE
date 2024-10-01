@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      state_order:{
+      state_order:{ //active, pending, success, done
         type: DataTypes.STRING,
         allowNull: false,
       },

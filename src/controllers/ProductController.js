@@ -1,47 +1,63 @@
 const fs = require("fs");
 const { uploads } = require("../until/cloudinary");
-const {Product} = require('../models')
+const {Product} = require('../models');
 
 class ProductController{
     // [POST] /product/create
     async newProduct(req,res,next){
         // req.body.user = req.user._id;
         const product = await Product.create(req.body);
-        res.status(201).json({
-            product,
-        });
+        res.status(201).json(product);
     }
-    // [GET]
+
+    // [GET] /api/products/get-products/
     async getProducts(req, res, next) {
-        // const resPerPage = 2;
-        // const productsCount = await Product.countDocuments();
+        const {numberItem, typeGet} = req.query;
+        const itemsHasPrice= await Product.findAll()
+        if(!itemsHasPrice.length) return res.status(404).json({err: "Product not found"})
+        switch (typeGet) {
+            case 'best-seller': { // best-seller
+                var temp =[]
+                for (var i = 0; i < numberItem; i++){
+                    const item = {
+                        ...itemsHasPrice[i].dataValues,
+                        saled: 50
+                    }
+                    temp.push(item)
+                }
+                res.json(temp)
+                break;
+            }
+            case'recomment': {  // recomment product
+                var temp =[]
+                for (var i = 0; i < numberItem; i++){
+                    const item = {
+                        ...itemsHasPrice[i].dataValues,
 
-        // const apiFilters = new APIFilters(Product.find(), req.query)
-        //     .search()
-        //     .filter();
-
-        // let products = await apiFilters.query;
-        // const filteredProductsCount = products.length;
-
-        // apiFilters.pagination(resPerPage);
-
-        // products = await apiFilters.query.clone();
-
-        // res.status(200).json({
-        //     productsCount,
-        //     resPerPage,
-        //     filteredProductsCount,
-        //     products,
-        // });
+                    }
+                    temp.push(item)
+                }
+                res.json(temp)
+                break;
+            }
+            default: {
+                // Lấy tất cả sản phẩm
+                res.json(itemsHasPrice)
+            }
+        }
+        
+       
+        
+        
     }
-    // [GET] /product/:id
+    // [GET] api/products/:id
     async getProduct(req, res, next){
         const product = await Product.findOne({
             where:{name: req.params.id}
         });
 
         if (!product) {
-            return next(new ErrorHandler("Product not found.", 404));
+            return res.status(404).json({error: 'Product not found'});
         }
 
         res.status(200).json({
@@ -53,7 +69,7 @@ class ProductController{
         let product = await Product.findByPk(req.query.id);
 
         if (!product) {
-            return next(new ErrorHandler("Product not found.", 404));
+            return res.status(404).json({error: 'Product not found'});
         }
 
         const uploader = async (path) => await uploads(path, "Products");
@@ -80,7 +96,7 @@ class ProductController{
         let product = await Product.findByPk(req.params.id);
 
         if (!product) {
-            return next(new ErrorHandler("Product not found.", 404));
+            return res.status(404).json({error: 'Product not found'});
         }
 
         product = await Product.set({
@@ -98,7 +114,7 @@ class ProductController{
         let product = await Product.findByPk(req.params.id);
 
         if (!product) {
-            return next(new ErrorHandler("Product not found.", 404));
+            return res.status(404).json({error: 'Product not found'});
         }
         var images = JSON.parse(product.images)
         for (let i = 0; i < images.length; i++) {

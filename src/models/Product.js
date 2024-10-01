@@ -19,6 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       },
       images:{
         type: DataTypes.JSON
+      },
+      price:{
+        type: DataTypes.FLOAT,
       }
     });
   
